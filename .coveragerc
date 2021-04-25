@@ -1,0 +1,3 @@
+[run]
+source = src/pyams_auth_sql
+omit = src/pyams_auth_sql/tests/*
