@@ -108,7 +108,7 @@ msgstr "Ajout d'un annuaire SQL"
 
 #: src/pyams_auth_sql/zmi/__init__.py:69
 msgid "SQL authentication plug-in"
-msgstr "Module d'authentification SQL"
+msgstr "Annuaire SQL"
 
 #: src/pyams_auth_sql/zmi/__init__.py:80 src/pyams_auth_sql/zmi/__init__.py:93
 msgid "Users search form"

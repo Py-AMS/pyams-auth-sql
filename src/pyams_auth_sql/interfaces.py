@@ -32,6 +32,9 @@ class ISQLUserInfo(Interface):
     plugin = Attribute("SQL authentication plug-in")
 
 
+SQL_AUTH_PLUGIN_LABEL = _("SQL authentication plug-in")
+
+
 class ISQLAuthPlugin(IAuthenticationPlugin, IDirectorySearchPlugin):
     """SQL authentication plug-in interface"""
 

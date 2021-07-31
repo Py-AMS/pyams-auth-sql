@@ -15,7 +15,7 @@
 This module provides management interface components.
 """
 
-from pyams_auth_sql.interfaces import ISQLAuthPlugin
+from pyams_auth_sql.interfaces import ISQLAuthPlugin, SQL_AUTH_PLUGIN_LABEL
 from pyams_form.ajax import ajax_form_config
 from pyams_layer.interfaces import IPyAMSLayer
 from pyams_pagelet.pagelet import pagelet_config
@@ -58,15 +58,14 @@ class SQLAuthPluginAddMenu(SecurityPluginAddMenu):
 class SQLAuthPluginAddForm(SecurityPluginAddForm):
     """SQL authentication plug-in add form"""
 
-    legend = _("Add SQL authentication plug-in")
     content_factory = ISQLAuthPlugin
+    content_label = SQL_AUTH_PLUGIN_LABEL
 
 
 @ajax_form_config(name='properties.html', context=ISQLAuthPlugin, layer=IPyAMSLayer)
 class SQLAuthPluginPropertiesEditForm(SecurityPluginPropertiesEditForm):
     """SQL authentication plug-in properties edit form"""
 
-    title = _("SQL authentication plug-in")
     plugin_interface = ISQLAuthPlugin
 
 
