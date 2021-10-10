@@ -27,6 +27,7 @@ from zope.schema.fieldproperty import FieldProperty
 from pyams_alchemy.engine import get_user_session
 from pyams_auth_sql.interfaces import ISQLAuthPlugin, ISQLUserInfo
 from pyams_mail.interfaces import IPrincipalMailInfo
+from pyams_security.interfaces import PRINCIPAL_ID_FORMATTER
 from pyams_security.principal import PrincipalInfo
 from pyams_utils.adapter import ContextAdapter, adapter_config
 from pyams_utils.factory import factory_config
@@ -111,8 +112,8 @@ class SQLAuthPlugin(Persistent, Contained):
             if not entry[self.password_attribute]:
                 continue
             if self.check_password(entry, password):
-                return '{prefix}:{login}'.format(prefix=self.prefix,
-                                                 login=entry[self.login_attribute])
+                return PRINCIPAL_ID_FORMATTER.format(prefix=self.prefix,
+                                                     login=entry[self.login_attribute])
         return None
 
     def get_principal(self, principal_id, info=True):
@@ -129,8 +130,8 @@ class SQLAuthPlugin(Persistent, Contained):
             self.login_attribute,
         ))
         for entry in engine.execute(sql, params={'login': login}):
-            principal_id = '{prefix}:{login}'.format(prefix=self.prefix,
-                                                     login=entry[self.login_attribute])
+            principal_id = PRINCIPAL_ID_FORMATTER.format(prefix=self.prefix,
+                                                         login=entry[self.login_attribute])
             if info:
                 return PrincipalInfo(
                     id=principal_id,
@@ -165,8 +166,8 @@ class SQLAuthPlugin(Persistent, Contained):
         ))
         for entry in engine.execute(sql, params={'query': query}):
             yield PrincipalInfo(
-                id='{prefix}:{login}'.format(prefix=self.prefix,
-                                             login=entry[self.login_attribute]),
+                id=PRINCIPAL_ID_FORMATTER.format(prefix=self.prefix,
+                                                 login=entry[self.login_attribute]),
                 title=self.title_format.format(**entry))
 
     def get_search_results(self, data):
