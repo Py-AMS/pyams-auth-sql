@@ -1,6 +1,10 @@
 Changelog
 =========
 
+1.1.2
+-----
+ - use constant for principal ID formatter
+
 1.1.1
 -----
  - updated ZMI menus context
