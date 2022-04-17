@@ -13,11 +13,12 @@
 """PyAMS_auth_sql.interfaces module
 
 """
+
 from zope.interface import Attribute, Interface
 from zope.schema import Bool, Choice, TextLine
 
 from pyams_alchemy.interfaces import ALCHEMY_ENGINES_VOCABULARY
-from pyams_security.interfaces import IAuthenticationPlugin, IDirectorySearchPlugin
+from pyams_security.interfaces.plugin import IAuthenticationPlugin, IDirectorySearchPlugin
 
 from pyams_auth_sql import _
 

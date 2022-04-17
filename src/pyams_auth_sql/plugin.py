@@ -27,7 +27,7 @@ from zope.schema.fieldproperty import FieldProperty
 from pyams_alchemy.engine import get_user_session
 from pyams_auth_sql.interfaces import ISQLAuthPlugin, ISQLUserInfo
 from pyams_mail.interfaces import IPrincipalMailInfo
-from pyams_security.interfaces import PRINCIPAL_ID_FORMATTER
+from pyams_security.interfaces.names import PRINCIPAL_ID_FORMATTER
 from pyams_security.principal import PrincipalInfo
 from pyams_utils.adapter import ContextAdapter, adapter_config
 from pyams_utils.factory import factory_config
