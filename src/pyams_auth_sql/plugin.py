@@ -58,9 +58,9 @@ class SQLUserMailInfoAdapter(ContextAdapter):
         """Get mail address of given user"""
         user = self.context
         plugin = user.plugin
-        mail = user.attributes[plugin.mail_attribute]
+        mail = getattr(user.attributes, plugin.mail_attribute)
         if mail:
-            return {(plugin.title_format.format(**user.attributes), mail)}
+            return {(plugin.title_format.format(**user.attributes._mapping), mail)}
         return set()
 
 
@@ -84,7 +84,7 @@ class SQLAuthPlugin(Persistent, Contained):
 
     def check_password(self, entry, password):
         """Check encoded password with provided password"""
-        encoded = entry[self.password_attribute]
+        encoded = getattr(entry, self.password_attribute)
         for _, manager in get_utilities_for(IPasswordManager):
             try:
                 result = manager.checkPassword(encoded, password)
@@ -102,18 +102,19 @@ class SQLAuthPlugin(Persistent, Contained):
         login = attrs.get('login').lower()
         password = attrs.get('password')
         engine = get_user_session(self.sql_engine)
-        query = text("select * from {}{} where lower({}) = :login {}".format(
-            '{}.'.format(self.schema_name) if self.schema_name else '',
-            self.table_name,
-            self.login_attribute,
-            'or lower({}) = :login'.format(self.mail_attribute) if self.login_with_email else ''
-        ))
+        query = text(
+            "select * from {}{} where lower({}) = :login {}".format(
+                f'{self.schema_name}.' if self.schema_name else '',
+                self.table_name,
+                self.login_attribute,
+                f'or lower({self.mail_attribute}) = :login' if self.login_with_email else ''
+            ))
         for entry in engine.execute(query, params={'login': login}):
-            if not entry[self.password_attribute]:
+            if not getattr(entry, self.password_attribute):
                 continue
             if self.check_password(entry, password):
                 return PRINCIPAL_ID_FORMATTER.format(prefix=self.prefix,
-                                                     login=entry[self.login_attribute])
+                                                     login=getattr(entry, self.login_attribute))
         return None
 
     def get_principal(self, principal_id, info=True):
@@ -124,18 +125,19 @@ class SQLAuthPlugin(Persistent, Contained):
             return None
         prefix, login = principal_id.split(':', 1)  # pylint: disable=unused-variable
         engine = get_user_session(self.sql_engine)
-        sql = text("select * from {}{} where {} = :login".format(
-            '{}.'.format(self.schema_name) if self.schema_name else '',
-            self.table_name,
-            self.login_attribute,
-        ))
+        sql = text(
+            "select * from {}{} where {} = :login".format(
+                f'{self.schema_name}.' if self.schema_name else '',
+                self.table_name,
+                self.login_attribute,
+            ))
         for entry in engine.execute(sql, params={'login': login}):
             principal_id = PRINCIPAL_ID_FORMATTER.format(prefix=self.prefix,
-                                                         login=entry[self.login_attribute])
+                                                         login=getattr(entry, self.login_attribute))
             if info:
                 return PrincipalInfo(
                     id=principal_id,
-                    title=self.title_format.format(**entry))
+                    title=self.title_format.format(**entry._mapping))
             return SQLUserInfo(principal_id, entry, self)
         return None
 
@@ -157,18 +159,18 @@ class SQLAuthPlugin(Persistent, Contained):
         if not exact_match:
             query = '%{}%'.format(query)
         engine = get_user_session(self.sql_engine)
-        sql = text("select * from {}{} where lower({}) like :query {}".format(
-            '{}.'.format(self.schema_name) if self.schema_name else '',
-            self.table_name,
-            self.login_attribute,
-            'or lower({}) like :query'.format(self.mail_attribute)
-                if self.login_with_email else ''
-        ))
+        sql = text(
+            "select * from {}{} where lower({}) like :query {}".format(
+                f'{self.schema_name}.' if self.schema_name else '',
+                self.table_name,
+                self.login_attribute,
+                f'or lower({self.mail_attribute}) like :query' if self.login_with_email else ''
+            ))
         for entry in engine.execute(sql, params={'query': query}):
             yield PrincipalInfo(
                 id=PRINCIPAL_ID_FORMATTER.format(prefix=self.prefix,
-                                                 login=entry[self.login_attribute]),
-                title=self.title_format.format(**entry))
+                                                 login=getattr(entry, self.login_attribute)),
+                title=self.title_format.format(**entry._mapping))
 
     def get_search_results(self, data):
         """Search results getter"""
@@ -177,15 +179,14 @@ class SQLAuthPlugin(Persistent, Contained):
             return
         query = '%{}%'.format(query.lower())
         engine = get_user_session(self.sql_engine)
-        sql = text("select * from {}{} "
-                   "where lower({}) like :query "
-                   "   {}".format(
-            '{}.'.format(self.schema_name) if self.schema_name else '',
-            self.table_name,
-            self.login_attribute,
-            'or ' + ' or '.join((
-                'lower({}) like :query'.format(attr)
-                for attr in self.search_attributes.split(',')))
-                if self.search_attributes else ''
-        ))
+        sql = text(
+            "select * from {}{} where lower({}) like :query {}".format(
+                f'{self.schema_name}.' if self.schema_name else '',
+                self.table_name,
+                self.login_attribute,
+                'or ' + ' or '.join((
+                    f'lower({attr}) like :query'
+                    for attr in self.search_attributes.split(',')
+                )) if self.search_attributes else ''
+            ))
         yield from engine.execute(sql, params={'query': query})
