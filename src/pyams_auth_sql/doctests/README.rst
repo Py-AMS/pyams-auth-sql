@@ -56,16 +56,17 @@ an SQL database, using SQLAlchemy ORM and PyAMS_alchemy extension package.
 
     >>> import transaction
 
+    >>> from sqlalchemy.sql import text
     >>> from pyams_alchemy.engine import get_user_session
     >>> session = get_user_session("")
     >>> session
     <sqlalchemy.orm.session.Session object at 0x...>
 
-    >>> _ = session.execute("drop table if exists USERS")
-    >>> _ = session.execute("create table USERS (login varchar(255) primary key, \
-    ...                                          name varchar(255), \
-    ...                                          password varchar(255), \
-    ...                                          email varchar(255))")
+    >>> _ = session.execute(text("drop table if exists USERS"))
+    >>> _ = session.execute(text("create table USERS (login varchar(255) primary key, \
+    ...                                               name varchar(255), \
+    ...                                               password varchar(255), \
+    ...                                               email varchar(255))"))
 
     >>> from zope.password.interfaces import IPasswordManager
     >>> passmngr = config.registry.getUtility(IPasswordManager, name='PBKDF2')
